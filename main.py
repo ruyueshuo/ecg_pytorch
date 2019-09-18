@@ -13,7 +13,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 from dataset import ECGDataset
 from config import config
-
+from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 torch.manual_seed(41)
@@ -31,7 +31,7 @@ def save_ckpt(state, is_best, model_save_dir):
 def train_epoch(model, optimizer, criterion, train_dataloader, show_interval=10):
     model.train()
     f1_meter, loss_meter, it_count = 0, 0, 0
-    for inputs, target in train_dataloader:
+    for inputs, target in tqdm(train_dataloader):
         inputs = inputs.to(device)
         target = target.to(device)
         # zero the parameter gradients
@@ -113,6 +113,7 @@ def train(args):
     logger = Logger(logdir=model_save_dir, flush_secs=2)
     # =========>开始训练<=========
     for epoch in range(start_epoch, config.max_epoch + 1):
+        print("epoch:", epoch)
         since = time.time()
         train_loss, train_f1 = train_epoch(model, optimizer, criterion, train_dataloader, show_interval=100)
         val_loss, val_f1 = val_epoch(model, criterion, val_dataloader)
