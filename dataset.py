@@ -14,6 +14,13 @@ from sklearn.preprocessing import scale
 from scipy import signal
 
 
+def add_feature(df):
+    df['III'] = df['II'] - df['I']
+    df['aVR'] = (df['II'] + df['I']) / 2
+    df['aVL'] = (df['I'] - df['II']) / 2
+    df['aVF'] = (df['II'] - df['I']) / 2
+    return df
+
 def resample(sig, target_point_num=None):
     '''
     对原始信号进行重采样
@@ -81,7 +88,9 @@ class ECGDataset(Dataset):
     def __getitem__(self, index):
         fid = self.data[index]
         file_path = os.path.join(config.train_dir, fid)
-        df = pd.read_csv(file_path, sep=' ').values
+        df = pd.read_csv(file_path, sep=' ')
+        df = add_feature(df).values
+        # df = pd.read_csv(file_path, sep=' ').values
         x = transform(df, self.train)
         target = np.zeros(config.num_classes)
         target[self.file2idx[fid]] = 1

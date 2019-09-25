@@ -11,7 +11,7 @@ import pandas as pd
 from tensorboard_logger import Logger
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from dataset import ECGDataset
+from dataset import ECGDataset, add_feature
 from config import config
 from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,7 +54,7 @@ def val_epoch(model, criterion, val_dataloader, threshold=0.5):
     model.eval()
     f1_meter, loss_meter, it_count = 0, 0, 0
     with torch.no_grad():
-        for inputs, target in val_dataloader:
+        for inputs, target in tqdm(val_dataloader):
             inputs = inputs.to(device)
             target = target.to(device)
             output = model(inputs)
@@ -77,9 +77,9 @@ def train(args):
     model = model.to(device)
     # data
     train_dataset = ECGDataset(data_path=config.train_data, train=True)
-    train_dataloader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=6)
+    train_dataloader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_dataset = ECGDataset(data_path=config.train_data, train=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=4)
+    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=0)
     print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # optimizer and loss
     optimizer = optim.Adam(model.parameters(), lr=config.lr)
@@ -143,7 +143,7 @@ def val(args):
     model = model.to(device)
     criterion = nn.BCEWithLogitsLoss()
     val_dataset = ECGDataset(data_path=config.train_data, train=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=4)
+    val_dataloader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=0)
     for threshold in list_threhold:
         val_loss, val_f1 = val_epoch(model, criterion, val_dataloader, threshold)
         print('threshold %.2f val_loss:%0.3e val_f1:%.3f\n' % (threshold, val_loss, val_f1))
@@ -167,7 +167,9 @@ def test(args):
             fout.write(line.strip('\n'))
             id = line.split('\t')[0]
             file_path = os.path.join(config.test_dir, id)
-            df = pd.read_csv(file_path, sep=' ').values
+            # df = pd.read_csv(file_path, sep=' ').values
+            df = pd.read_csv(file_path, sep=' ')
+            df = add_feature(df).values
             x = transform(df).unsqueeze(0).to(device)
             output = torch.sigmoid(model(x)).squeeze().cpu().numpy()
             ixs = [i for i, out in enumerate(output) if out > 0.5]
