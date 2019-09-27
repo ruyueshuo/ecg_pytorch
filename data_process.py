@@ -11,7 +11,7 @@ import numpy as np
 from config import config
 
 # 保证每次划分数据一致
-np.random.seed(41)
+np.random.seed(config.seed)
 
 
 def name2index(path):

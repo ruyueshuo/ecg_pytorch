@@ -16,8 +16,8 @@ from config import config
 from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-torch.manual_seed(41)
-torch.cuda.manual_seed(41)
+torch.manual_seed(config.seed)
+torch.cuda.manual_seed(config.seed)
 
 
 # 保存当前模型的权重，并且更新最佳的模型权重

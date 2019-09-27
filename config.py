@@ -44,6 +44,8 @@ class Config:
     # 学习率衰减 lr/=lr_decay
     lr_decay = 10
 
+    seed = 2019
+
     #for test
     temp_dir=os.path.join(root,'temp')
 
