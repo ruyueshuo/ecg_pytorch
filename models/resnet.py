@@ -5,9 +5,11 @@
 @ author: javis
 '''
 
+import torch
 import torch.nn as nn
 import math
 import torch.utils.model_zoo as model_zoo
+from utils import time_feature
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152']
@@ -116,7 +118,7 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AdaptiveAvgPool1d(1)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear((512+0) * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
@@ -144,6 +146,12 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        time_feats = time_feature(x.numpy())
+        time_feats = torch.from_numpy(time_feats).float()
+        # print(time_feats.requires_grad)
+        time_feats.requires_grad_()
+        # print(time_feats.requires_grad)
+        # print("size of time_feats is: ", time_feats.size())  # [64, 512]
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -155,8 +163,17 @@ class ResNet(nn.Module):
         x = self.layer4(x)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
+        # print("x:", x)
+        # print("timeFeats:", time_feats)
+        # print("size of x is: ", x.size())  # [64, 512]
+        # x = torch.cat((x, time_feats), 1)
+        # print("size of x is: ", x.size())  # [64, 512]
+        # l1 = nn.Linear((512 + 96), 1024)
+        # x = l1(x)
+        # l2 = nn.Linear(1024, 55)
+        # x = l2(x)
         x = self.fc(x)
-
+        # print(x)
         return x
 
 

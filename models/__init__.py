@@ -5,4 +5,4 @@
 @ author: javis
 '''
 
-from .resnet import resnet34,resnet101
+from .resnet import resnet34,resnet101,resnet18

@@ -20,7 +20,7 @@ class Config:
 
     # for train
     #训练的模型名称
-    model_name = 'resnet34'
+    model_name = 'resnet18'
     #在第几个epoch进行到下一个state,调整lr
     stage_epoch = [32,64,128]
     #训练时的batch大小

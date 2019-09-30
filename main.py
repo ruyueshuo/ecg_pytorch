@@ -38,12 +38,17 @@ def train_epoch(model, optimizer, criterion, train_dataloader, show_interval=10)
         optimizer.zero_grad()
         # forward
         output = model(inputs)
+        # print("output:", output)
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
         loss_meter += loss.item()
         it_count += 1
+        # print("output: \t target:".format(output, target))
+        # print("shape of output:", output.size())
+        # print("shape of target:", target.size())
         f1 = utils.calc_f1(target, torch.sigmoid(output))
+        # print("%d,loss:%.3e f1:%.3f" % (it_count, loss.item(), f1))
         f1_meter += f1
         if it_count != 0 and it_count % show_interval == 0:
             print("%d,loss:%.3e f1:%.3f" % (it_count, loss.item(), f1))

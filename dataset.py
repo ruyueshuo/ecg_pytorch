@@ -6,12 +6,13 @@
 '''
 import pywt, os, copy
 import torch
+import math
 import numpy as np
 import pandas as pd
 from config import config
 from torch.utils.data import Dataset
 from sklearn.preprocessing import scale
-from scipy import signal
+from scipy import signal, stats
 
 
 def add_feature(df):
@@ -101,6 +102,18 @@ class ECGDataset(Dataset):
         return len(self.data)
 
 
+def plot_ect(data):
+    import matplotlib.pyplot as plt
+    plt.plot(data)
+    plt.show()
+    pass
+
+
 if __name__ == '__main__':
     d = ECGDataset(config.train_data)
-    print(d[0])
+    print(d[0][0].size()[0])
+    print(d[0][1].size())
+    print(d[0][0][0].size())
+    for i in range(d[0][0].size()[0]):
+
+        plot_ect(np.array(d[0][0][i]))

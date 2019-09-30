@@ -6,9 +6,10 @@
 '''
 import torch
 import numpy as np
-import time,os
+import time,os, math
 from sklearn.metrics import f1_score
 from torch import nn
+from scipy import stats
 
 
 def mkdirs(path):
@@ -19,6 +20,10 @@ def mkdirs(path):
 def calc_f1(y_true, y_pre, threshold=0.5):
     y_true = y_true.view(-1).cpu().detach().numpy().astype(np.int)
     y_pre = y_pre.view(-1).cpu().detach().numpy() > threshold
+    # print("y_true:", y_true)
+    # print("y_pre:", y_pre)
+    # print("shape of y_true:", y_true.shape)
+    # print("shape of y_pre:", y_pre.shape)
     return f1_score(y_true, y_pre)
 
 #打印时间
@@ -43,3 +48,36 @@ class WeightedMultilabel(nn.Module):
     def forward(self, outputs, targets):
         loss = self.cerition(outputs, targets)
         return (loss * self.weights).mean()
+
+
+def time_feature(d):
+    """
+    获取时域特征
+    :param data: np.array.时域信号
+    :return: timeFeatList: 时域特征
+    """
+    feats = []
+    for i in range(d.shape[0]):
+        temp = []
+        for j in range(d.shape[1]):
+            data = d[i, j, :]
+            dfMean = np.mean(data)  # 均值
+            dfVar = np.var(data)  # 方差
+            dfStd = np.std(data)  # 标准差
+            dfRMS = math.sqrt(pow(dfMean, 2) + pow(dfStd, 2))  # 均方根
+            dataSorted = np.sort(np.abs(data))
+            dfPeak = np.mean(dataSorted[-10:])
+            dfSkew = stats.skew(data)  # 偏度
+            dfKurt = stats.kurtosis(data)  # 峭度
+            # dfBoxingFactor = dfRMS / np.mean(np.abs(data))
+            dfPeakFactor = dfPeak / dfRMS  # 峰值因子
+            dfPulseFactor = dfPeak / np.mean(np.abs(data))  # 脉冲因子
+
+            timeFeats = [dfMean, dfVar, dfRMS, dfPeak, dfSkew, dfKurt, dfPeakFactor, dfPulseFactor]
+            # print(timeFeats)
+            # break
+            temp.append(timeFeats)
+        feats.append(temp)
+    feats = np.array(feats)
+    feats = feats.reshape((d.shape[0], -1))
+    return feats
