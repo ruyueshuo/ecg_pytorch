@@ -11,18 +11,19 @@ class Config:
     # for data_process.py
     #root = r'D:\ECG'
     root = r'data'
-    train_dir = os.path.join(root, 'hf_round1_train/train')
-    test_dir = os.path.join(root, 'hf_round1_testA/testA')
+    train_dir = os.path.join(root, 'train')
+    test_dir = os.path.join(root, 'hf_round1_testA/testB_noDup_rename')
     train_label = os.path.join(root, 'hf_round1_label.txt')
-    test_label = os.path.join(root, 'hf_round1_subA.txt')
+    test_label = os.path.join(root, 'hf_round1_subB_noDup_rename.txt')
     arrythmia = os.path.join(root, 'hf_round1_arrythmia.txt')
     train_data = os.path.join(root, 'train.pth')
 
     # for train
     #训练的模型名称
     model_name = 'resnet18'
+    # model_name = 'densenet121'
     #在第几个epoch进行到下一个state,调整lr
-    stage_epoch = [32,64,128]
+    stage_epoch = [16,32,64]
     #训练时的batch大小
     batch_size = 64
     #label的类别数

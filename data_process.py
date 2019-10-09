@@ -48,6 +48,27 @@ def split_data(file2idx, val_ratio=0.1):
     return list(train), list(val)
 
 
+def split_data_kfold(file2idx, val_ratio=0.1):
+    '''
+    划分数据集,val需保证每类至少有1个样本
+    :param file2idx:
+    :param val_ratio:验证集占总数据的比例
+    :return:训练集，验证集路径
+    '''
+    data = set(os.listdir(config.train_dir))
+    val = set()
+    idx2file = [[] for _ in range(config.num_classes)]
+    for file, list_idx in file2idx.items():
+        for idx in list_idx:
+            idx2file[idx].append(file)
+    for item in idx2file:
+        # print(len(item), item)
+        num = int(len(item) * val_ratio)
+        val = val.union(item[:num])
+    train = data.difference(val)
+    return list(train), list(val)
+
+
 def file2index(path, name2idx):
     '''
     获取文件id对应的标签类别
@@ -72,14 +93,19 @@ def count_labels(data, file2idx):
     :return:
     '''
     cc = [0] * config.num_classes
-    for fp in data:
+    for ii, fp in enumerate(data):
+        print(ii, fp)
+        # if fp[-3:] == 'txt':
         for i in file2idx[fp]:
+            print(i)
             cc[i] += 1
     return np.array(cc)
 
 
 def train(name2idx, idx2name):
-    file2idx = file2index(config.train_label, name2idx)
+    file2idxtrn = file2index(config.train_label, name2idx)
+    file2idxtst = file2index(test_label, name2idx)
+    file2idx = dict(file2idxtrn, **file2idxtst)
     train, val = split_data(file2idx)
     wc=count_labels(train,file2idx)
     print(wc)
@@ -88,6 +114,16 @@ def train(name2idx, idx2name):
 
 
 if __name__ == '__main__':
+    root = r'data'
+    train_label = os.path.join(root, 'hf_round1_label.txt')
+    test_label = os.path.join(root, 'hefei_round1_ansA_20191008.txt')
+    with open(train_label, encoding="utf-8") as trn_f:
+        trn = trn_f.read()
+    with open(test_label, encoding="utf-8") as tst_f:
+        tst = tst_f.read()
+    # f = trn.join(tst)
+    # for line in open(train_label, encoding='utf-8'):
+    #     arr = line.strip().split('\t')
     pass
     name2idx = name2index(config.arrythmia)
     idx2name = {idx: name for name, idx in name2idx.items()}

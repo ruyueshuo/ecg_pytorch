@@ -146,10 +146,10 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        time_feats = time_feature(x.numpy())
-        time_feats = torch.from_numpy(time_feats).float()
-        # print(time_feats.requires_grad)
-        time_feats.requires_grad_()
+        # time_feats = time_feature(x.numpy())
+        # time_feats = torch.from_numpy(time_feats).float()
+        # # print(time_feats.requires_grad)
+        # time_feats.requires_grad_()
         # print(time_feats.requires_grad)
         # print("size of time_feats is: ", time_feats.size())  # [64, 512]
         x = self.conv1(x)
@@ -240,7 +240,7 @@ def resnet152(pretrained=False, **kwargs):
 if __name__ == '__main__':
     import torch
 
-    x = torch.randn(1, 8, 2048)
+    x = torch.randn(1, 12, 2048)
     m = resnet34()
     m(x)
     from torchvision.models import resnet

@@ -6,3 +6,4 @@
 '''
 
 from .resnet import resnet34,resnet101,resnet18
+from .densenet import densenet121,densenet161

@@ -5,15 +5,18 @@
 @ author: javis
 '''
 import torch, time, os, shutil
-import models, utils
-import numpy as np
 import pandas as pd
 from tensorboard_logger import Logger
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from dataset import ECGDataset, add_feature
-from config import config
 from tqdm import tqdm
+import argparse
+
+import models, utils
+from dataset import ECGDataset, add_feature, transform
+from data_process import name2index
+from config import config
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 torch.manual_seed(config.seed)
@@ -25,7 +28,8 @@ def save_ckpt(state, is_best, model_save_dir):
     current_w = os.path.join(model_save_dir, config.current_w)
     best_w = os.path.join(model_save_dir, config.best_w)
     torch.save(state, current_w)
-    if is_best: shutil.copyfile(current_w, best_w)
+    if is_best:
+        shutil.copyfile(current_w, best_w)
 
 
 def train_epoch(model, optimizer, criterion, train_dataloader, show_interval=10):
@@ -92,7 +96,8 @@ def train(args):
     criterion = utils.WeightedMultilabel(w)
     # 模型保存文件夹
     model_save_dir = '%s/%s_%s' % (config.ckpt, config.model_name, time.strftime("%Y%m%d%H%M"))
-    if args.ex: model_save_dir += args.ex
+    if args.ex:
+        model_save_dir += args.ex
     best_f1 = -1
     lr = config.lr
     start_epoch = 1
@@ -140,7 +145,8 @@ def train(args):
             print("*" * 10, "step into stage%02d lr %.3ef" % (stage, lr))
             utils.adjust_learning_rate(optimizer, lr)
 
-#用于测试加载模型
+
+# 用于测试加载模型
 def val(args):
     list_threhold = [0.5]
     model = getattr(models, config.model_name)()
@@ -153,10 +159,9 @@ def val(args):
         val_loss, val_f1 = val_epoch(model, criterion, val_dataloader, threshold)
         print('threshold %.2f val_loss:%0.3e val_f1:%.3f\n' % (threshold, val_loss, val_f1))
 
-#提交结果使用
+
+# 提交结果使用
 def test(args):
-    from dataset import transform
-    from data_process import name2index
     name2idx = name2index(config.arrythmia)
     idx2name = {idx: name for name, idx in name2idx.items()}
     utils.mkdirs(config.sub_dir)
@@ -184,20 +189,16 @@ def test(args):
     fout.close()
 
 
-
 if __name__ == '__main__':
-
-    import argparse
-
     parser = argparse.ArgumentParser()
     parser.add_argument("command", metavar="<command>", help="train or infer")
     parser.add_argument("--ckpt", type=str, help="the path of model weight file")
     parser.add_argument("--ex", type=str, help="experience name")
     parser.add_argument("--resume", action='store_true', default=False)
     args = parser.parse_args()
-    if (args.command == "train"):
+    if args.command == "train":
         train(args)
-    if (args.command == "test"):
+    if args.command == "test":
         test(args)
     if (args.command == "val"):
         val(args)

@@ -57,6 +57,12 @@ def shift(sig, interval=20):
     return sig
 
 
+def min_max(data):
+    min = data.min()
+    max = data.max()
+    return (data - min) / (max - min)
+
+
 def transform(sig, train=False):
     # 前置不可或缺的步骤
     sig = resample(sig, config.target_point_num)
@@ -67,6 +73,10 @@ def transform(sig, train=False):
         if np.random.randn() > 0.5: sig = shift(sig)
     # 后置不可或缺的步骤
     sig = sig.transpose()
+    # 归一化
+    # sig = min_max(sig)
+    # print(sig)
+    # print("shape of sig:", sig.shape)
     sig = torch.tensor(sig.copy(), dtype=torch.float)
     return sig
 
