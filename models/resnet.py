@@ -1,9 +1,9 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
-@time: 2019/9/8 20:14
-直接修改torch的resnet
-@ author: javis
-'''
+# @Time    : 2019/10/8 上午10:21
+# @Author  : ruyueshuo
+# @File    : resnet.py
+# @Software: PyCharm
 
 import torch
 import torch.nn as nn

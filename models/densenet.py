@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2019/10/8 上午10:21
-# @Author  : FengDa
+# @Author  : ruyueshuo
 # @File    : densenet.py
 # @Software: PyCharm
 
